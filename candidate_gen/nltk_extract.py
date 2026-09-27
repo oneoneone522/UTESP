@@ -82,16 +82,32 @@ def get_nps_nltk_raw(doc, validate=VALIDATE):
             return nps_v
     return nps
 
+# batch_size = multiprocessing.cpu_count() * 2
+# _pool = multiprocessing.Pool(batch_size)
+
+
+# def get_nps_nltk(doc, validate=VALIDATE):
+#     if type(doc) is list:
+#         return _pool.map(get_nps_nltk_raw, doc)
+#     else:
+#         return get_nps_nltk_raw(doc)
+
 batch_size = multiprocessing.cpu_count() * 2
-_pool = multiprocessing.Pool(batch_size)
+_pool = None
+
+
+def _get_pool():
+    global _pool
+    if _pool is None:
+        _pool = multiprocessing.Pool(batch_size)
+    return _pool
 
 
 def get_nps_nltk(doc, validate=VALIDATE):
     if type(doc) is list:
-        return _pool.map(get_nps_nltk_raw, doc)
+        return _get_pool().map(get_nps_nltk_raw, doc)
     else:
         return get_nps_nltk_raw(doc)
-
 
 def writeToJson(inFile, outFile):
     with open(inFile, 'r') as fin, open(outFile, 'w') as fout:
